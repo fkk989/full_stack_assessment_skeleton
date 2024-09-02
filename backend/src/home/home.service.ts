@@ -1,12 +1,6 @@
-import {
-  BadRequestException,
-  Injectable,
-  MethodNotAllowedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserHomeDto } from './dto/create-user-home.dto';
 import { DatabaseService } from 'src/database/database.service';
-import { user_home } from '@prisma/client';
-import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class HomeService {

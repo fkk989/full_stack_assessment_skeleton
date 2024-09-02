@@ -7,6 +7,6 @@ import { UserModule } from 'src/user/user.module';
 @Module({
   controllers: [HomeController],
   providers: [HomeService],
-  imports: [UserModule, DatabaseModule],
+  imports: [DatabaseModule],
 })
 export class HomeModule {}
