@@ -24,9 +24,7 @@ export const HouseEditModal: React.FC<DropdownProp> = (prop) => {
   const users = useSelector((state: RootState) => state.user.users);
 
   // fetching all users related to the street_address
-  const { query: homeUserQuery, data: homeUsers } = useGetUserByHouse(
-    prop.street_address
-  );
+  const { data: homeUsers } = useGetUserByHouse(prop.street_address);
 
   const handleSetSelectedUser = ({
     username,
@@ -43,11 +41,11 @@ export const HouseEditModal: React.FC<DropdownProp> = (prop) => {
   // setting all checked user false for the first time
   useEffect(() => {
     users?.map(({ username }) => {
-      if (selectedUser[username] === undefined) {
+      if (selectedUser[username] === undefined || selectedUser[username]) {
         handleSetSelectedUser({ username, checked: false });
       }
     });
-  }, [users]);
+  }, [users, homeUsers]);
   // setting all user related to home true
   useEffect(() => {
     homeUsers?.map(({ username }) => {
@@ -77,19 +75,14 @@ export const HouseEditModal: React.FC<DropdownProp> = (prop) => {
   };
   //
   const { mutation: HomeUserMutation } = useUpdateHomeUser();
-  // refetch on successfull mutation
-  useEffect(() => {
-    if (HomeUserMutation.isSuccess) {
-      homeUserQuery.refetch();
-    }
-  }, [HomeUserMutation.isSuccess]);
+
   // handling success for error for mutation
   useEffect(() => {
     // closing modal after successfull mutation and the completion of data refetching
-    if (HomeUserMutation.isSuccess && !homeUserQuery.isRefetching) {
+    if (HomeUserMutation.isSuccess) {
       prop.setOpen(false);
     }
-  }, [HomeUserMutation.isSuccess, homeUserQuery.isRefetching]);
+  }, [HomeUserMutation.isSuccess]);
   //
   return (
     <Modal.Root
