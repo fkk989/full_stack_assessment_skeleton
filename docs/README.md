@@ -3,6 +3,11 @@
 
 A brief description of what this project does and who it's for
 
+
+# Project Title
+
+A brief description of what this project does and who it's for
+
 # Introduction - how to read this doc
 
 - This exercise is designed to test basic skills in 3 core areas:
@@ -272,7 +277,10 @@ named ``` user_home ``` with a composite primary keys froming by `username and s
     - will not cause cors error 
     - will not have to write url again and again 
 
+#### note: - start the backend before starting the frontend
+
 #### Setup
+
  - run ```cd frontend ``` into root directory
  - to install dependencies run ``` npm install ```
  - to start dev server ``` npm run dev ```. This will start the frontend at http://localhost:3000
@@ -359,13 +367,15 @@ named ``` user_home ``` with a composite primary keys froming by `username and s
                 street_address: string
            }
           ```
+        - used ``` zod ``` for request body validation 
+        - create a custom ```zodValidation``` pipe to validate zod schema;
         - add all checked user to user_home talbe with the street_address if they are not there
         - delete all unchecked user only in they were present before in user_home table
 
 #### Setup
 
 - cd in to backend  ```cd backend```
-- install dependencies ``` npm run install ```
+- install dependencies ``` npm install ```
 - start dev server ``` npm run start:dev ``` will state
 - start prod server 
   - run ``` npm run build ```
