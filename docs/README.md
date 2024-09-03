@@ -1,3 +1,8 @@
+
+# Project Title
+
+A brief description of what this project does and who it's for
+
 # Introduction - how to read this doc
 
 - This exercise is designed to test basic skills in 3 core areas:
@@ -129,7 +134,44 @@ docker-compose -f docker-compose.initial.yml up --build -d
 
 ### solution
 
-> explain briefly your solution for this problem here
+- steps I have taken to normalize db:
+  - renamed **user_home** table to **old_user_home** so I can create a table with  **user_home**
+  - Then created three tables **user** table **home** and a  **junction table** named **user_home** and inserted data from the **old_user_home** table respectively to every table
+
+**our new ``` user  ``` talbe with username as primary key**
+
+|**Username**  | **Email**          |
+|-----------   |--------------------|
+| user1        | user1@example.com  |
+| user2        | user2@example.com  |
+| user3        | user3@example.com  |
+
+
+**our new `` home`` table with street_address as primary key**
+| **street_address**       | **state**     | **zip** | **sqft** | **beds** | **baths** | **list_price** |
+|--------------------------|---------------|---------|----------|----------|-----------|----------------|
+ 72242 Jacobson Square    | Arizona       | 05378   | 2945.89  | 1        | 3         | 791204.0       |
+ 75246 Cumberland Street  | Arizona       | 08229   | 2278.71  | 2        | 1         | 182092.0       |
+ 72242 Jacobson Square    | Arizona       | 05378   | 2945.89  | 1        | 3         | 791204.0       |
+811 Walker-Bogan Terrace | Rhode Island  | 19219   | 3648.42  | 1        | 2         | 964995.0       |
+
+
+**our new junction table creating a many to many relation with user and home.
+named ``` user_home ``` with a composite primary keys froming by `username and street_address`**
+
+|**username**  | **street_address**    |
+|--------------|-----------------------| 
+| user1        | 101 E Park Avenue     |
+| user2        | 10432 N Broad Street  |
+| user3        | 1046 Lula Pike        |
+
+
+- **To check for the changes**
+- run ```docker-compose -f docker-compose.final.yml up --build -d ``` in the root folder
+- run ``` docker exec -it mysql_ctn_final /bin/bash``` in terminal you will enter the docker container 
+- then run ``` mysql -u root -p home_db``` it will then ask for password, enter ``` 6equj5_root ``` as password
+- now you can view the new tables by running ``` SHOW TABLES;``` 
+- or you can select data from any table by running ``` SELECT * FROM <table-name> LIMIT 5;``` to check if data is migrated or not 
 
 ## 2. React SPA
 
@@ -219,8 +261,24 @@ docker-compose -f docker-compose.initial.yml up --build -d
 > even if you can do state-management without Redux, you still must use Redux for the solution, (remember the idea is to showcase the skills)
 
 ### solution
+ 
+- Tech stack used **``` vite ```** to create react app **```Tailwind```** for css **``` Redux toolkit ```** for state management and **``` TanStack react query ```** for data fetching didn't used any library for ``skeleton`` created my own ```skeletons```
+- **home user page**
+  - **userDropDwon** - created a custom, fully customizable user dropdown which all the core functionality with no styling so you can style it based on your need
+  - **Infinity scroll** - used ``` page( page number) and limit ``` as a means to refetch data .added a **```Observer component```** at the bottom of all **```house cards```** so when ever **```Observer comes into the view```**, it's increments the page number by 1 and  refetches houses with new page number and add more houses to the *```houseSlice```*
+  - **House User's Edit Modal** - created a custom, fully customizable Modal which all the core functionality with no styling so you can style it based on your need
 
-> explain briefly your solution for this problem here
+  - **added proxy** - added proxy in vite config so any request to **/api** will go to  http://localhost:8000
+    - will not cause cors error 
+    - will not have to write url again and again 
+
+#### Setup
+ - run ```cd frontend ``` into root directory
+ - to install dependencies run ``` npm install ```
+ - to start dev server ``` npm run dev ```. This will start the frontend at http://localhost:3000
+ - to satrt prod server 
+    - first run ``` npm run build ```
+    - then run ``` npm run preview ```. This will start the frontend  at http://localhost:3000
 
 ## 3. Backend API development on Node
 
@@ -281,7 +339,37 @@ docker-compose -f docker-compose.initial.yml up --build -d
 
 ### solution
 
-> explain briefly your solution for this problem here
+- techstack **``` NestJS ```** for backend and **``` Prisma```** as ORM
+- Api Implementation 
+   - added /api as a global prefix for all routes
+   - **users routes**
+     - GET &nbsp; /user &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; return all users
+     
+     - GET &nbsp; /user/:home &nbsp; &nbsp;  return all users related to the home
+    - **home routes**
+      - GET &nbsp; /home/:username?page=""&limit="" 
+        - takes page and limit to send data according to page number and limit of data
+        - validates page and limit params they should also be number string
+
+      - PUT &nbsp; /home
+        - request body 
+          ```js
+           {
+                users:{username: string, isChecked: boolean}[], 
+                street_address: string
+           }
+          ```
+        - add all checked user to user_home talbe with the street_address if they are not there
+        - delete all unchecked user only in they were present before in user_home table
+
+#### Setup
+
+- cd in to backend  ```cd backend```
+- install dependencies ``` npm run install ```
+- start dev server ``` npm run start:dev ``` will state
+- start prod server 
+  - run ``` npm run build ```
+  - run ``` npm run start:prod```
 
 ## Submission Guidelines
 

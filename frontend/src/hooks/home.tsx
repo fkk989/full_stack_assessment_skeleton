@@ -1,9 +1,10 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { House, UpdateHouseUsers } from "../utils/types";
 import { useDispatch } from "react-redux";
 import { SetStateAction, useEffect } from "react";
 import { setHome } from "../features/house";
+import toast from "react-hot-toast";
 
 export const useGetHomeByUser = ({
   username,
@@ -34,16 +35,39 @@ export const useGetHomeByUser = ({
 };
 
 export const useUpdateHomeUser = () => {
+  //
+  const queryClient = useQueryClient();
+  //
   const mutation = useMutation({
     mutationKey: ["update-home-users"],
     mutationFn: async (data: UpdateHouseUsers) => {
+      toast.loading("updatin home users", {
+        id: "one-user",
+        duration: 2000,
+      });
       //
       const updateHome = (await axios.put("/api/home", data)).data as {
         success: boolean;
         message: string;
       };
+
       //
       return updateHome;
+    },
+    onSuccess: () => {
+      // invalidatin get-home-by-user so we sholud get new data whenevern there is a change
+      queryClient.invalidateQueries({ queryKey: ["get-home-by-user"] });
+      toast.success("home users updated", {
+        id: "one-user",
+        duration: 2000,
+      });
+    },
+    onError: (error) => {
+      // @ts-ignore
+      toast.error(error?.response?.data?.message ?? "Error", {
+        id: "one-user",
+        duration: 2000,
+      });
     },
   });
   return { mutation };

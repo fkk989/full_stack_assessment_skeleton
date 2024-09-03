@@ -6,6 +6,7 @@ import { UpdateHouseUsers } from "../utils/types";
 import { RootState } from "../app/store";
 import { InputSkeleton } from "./skeletons/InputSkeleton";
 import { useUpdateHomeUser } from "../hooks/home";
+import toast from "react-hot-toast";
 
 interface DropdownProp {
   open: boolean;
@@ -14,14 +15,18 @@ interface DropdownProp {
 }
 
 export const HouseEditModal: React.FC<DropdownProp> = (prop) => {
+  //
   const [selectedUser, setSelectedUser] = useState<{ [key: string]: boolean }>(
     {}
   );
+
   //getting all users form redux state
   const users = useSelector((state: RootState) => state.user.users);
 
   // fetching all users related to the street_address
-  const { data: homeUsers } = useGetUserByHouse(prop.street_address);
+  const { query: homeUserQuery, data: homeUsers } = useGetUserByHouse(
+    prop.street_address
+  );
 
   const handleSetSelectedUser = ({
     username,
@@ -50,14 +55,42 @@ export const HouseEditModal: React.FC<DropdownProp> = (prop) => {
     });
   }, [homeUsers]);
 
-  //handling input
+  //handling input change
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const username = e.currentTarget.name;
     const isChecked = e.currentTarget.checked;
+
+    // check for atleast one user shold be checked
+    const selectedUserArr = Object.keys(selectedUser);
+    const checkedUserCount = selectedUserArr.filter(
+      (username) => selectedUser[username]
+    );
+    // if user count = 1 and the coming isChekced from input is false show error
+    if (checkedUserCount.length === 1 && !isChecked) {
+      toast.error("cannot uncheck all users", {
+        id: "one-user",
+        duration: 2000,
+      });
+      return;
+    }
     handleSetSelectedUser({ username, checked: isChecked });
   };
   //
   const { mutation: HomeUserMutation } = useUpdateHomeUser();
+  // refetch on successfull mutation
+  useEffect(() => {
+    if (HomeUserMutation.isSuccess) {
+      homeUserQuery.refetch();
+    }
+  }, [HomeUserMutation.isSuccess]);
+  // handling success for error for mutation
+  useEffect(() => {
+    // closing modal after successfull mutation and the completion of data refetching
+    if (HomeUserMutation.isSuccess && !homeUserQuery.isRefetching) {
+      prop.setOpen(false);
+    }
+  }, [HomeUserMutation.isSuccess, homeUserQuery.isRefetching]);
+  //
   return (
     <Modal.Root
       isOpen={prop.open}
@@ -78,10 +111,6 @@ export const HouseEditModal: React.FC<DropdownProp> = (prop) => {
                   className="flex items-center gap-[10px] cursor-pointer"
                 >
                   <input
-                    onLoad={(e) => {
-                      const isChecked = e.currentTarget.checked;
-                      console.log("isInputCheck: ", isChecked);
-                    }}
                     onChange={handleChange}
                     type="checkbox"
                     name={username}
@@ -109,6 +138,7 @@ export const HouseEditModal: React.FC<DropdownProp> = (prop) => {
             >
               Cancel
             </button>
+            {/*  */}
             <button
               onClick={() => {
                 const userToUpdate = users.map(({ username }) => {
@@ -118,9 +148,8 @@ export const HouseEditModal: React.FC<DropdownProp> = (prop) => {
                   users: userToUpdate,
                   street_address: prop.street_address,
                 };
+                // mutating home
                 HomeUserMutation.mutate(updateObj);
-                prop.setOpen(false);
-                console.log("updateobj", updateObj);
               }}
               className="w-[100px] h-[40px] flex justify-center items-center bg-[#3D82F5] hover:bg-[#3d80f5c9] text-white rounded-md"
             >

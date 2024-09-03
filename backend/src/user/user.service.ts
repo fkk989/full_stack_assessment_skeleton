@@ -18,15 +18,14 @@ export class UserService {
   }
   //
   async findByHOme(home: string) {
-    const street_address = home.split('-').join(' ');
-    console.log('street address', street_address);
+    console.log('home', home);
     try {
       //
       const users = await this.databseService.user.findMany({
         where: {
           homes: {
             some: {
-              street_address,
+              street_address: home,
             },
           },
         },
